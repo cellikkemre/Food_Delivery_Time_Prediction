@@ -1,4 +1,4 @@
-
+df.rename(columns={'city': 'type_of_city'}, inplace=True)
 
 # ID
 df.drop('ID', axis=1, inplace=True)
@@ -65,7 +65,7 @@ df["Delivery_person_Age"]=df["Delivery_person_Age"].astype(int)
 ########### Delivery_person_Rating ###########
 
 # Hava koşullarına göre sürücü performansı
-import pandas as pd
+
 
 
 # Hava koşullarına göre sürücü performansı
@@ -114,7 +114,7 @@ def add_rating_columns(df):
 
     return df
 
-
+add_rating_columns(df)
 
 
 
@@ -122,7 +122,86 @@ def add_rating_columns(df):
 
 
 
+def calculate_distance(df):
+    """
+    Verilen bir veri çerçevesindeki restoran ve teslimat lokasyonları arasındaki mesafeyi hesaplar ve yeni bir sütun oluşturur.
+    """
+    distances = []
+    for index, row in df.iterrows():
+        restaurant_coords = (row['Restaurant_latitude'], row['Restaurant_longitude'])
+        delivery_coords = (row['Delivery_location_latitude'], row['Delivery_location_longitude'])
+        distance = geodesic(restaurant_coords, delivery_coords).kilometers
+        distance_rounded = round(distance, 2)
+        distances.append(distance_rounded)
+    df['Distance'] = distances
 
+calculate_distance(df)
+
+
+
+
+##### Hava durumunu gruplara ayırma ####
+def categorize_weather(condition):
+    if condition in ['Windy', 'Stormy']:
+        return 'Bad Weather'
+    elif condition in ['Sunny', 'Cloudy']:
+        return 'Good Weather'
+    elif condition in ['Fog', 'Sandstorms']:
+        return 'Moderate Weather'
+
+
+df['weather_category'] = df['Weatherconditions'].apply(categorize_weather)
+
+###### hava durumunda conditions kelimesini kaldırma ######
+df['Weatherconditions'] = df['Weatherconditions'].str.replace('conditions ', '')
+
+
+
+# günü aralılara bölme(sabah, öğle, akşam)
+def time_of_day(x):
+    if x in [4, 5, 6, 7, 8, 9, 10]:
+        return "Morning"
+    elif x in [11, 12, 13, 14, 15]:
+        return "Afternoon"
+    elif x in [16, 17, 18, 19]:
+        return "Evening"
+    elif x in [20, 21, 22, 23]:
+        return "Night"
+    else:
+        return "Midnight"
+df['day_zone'] = df['Time_Order_picked_Hour'].apply(time_of_day)
+
+
+
+# gün bulma
+df['day_name'] = df['Order_Date'].dt.day_name()
+
+
+
+
+# Sipariş hazırlanma süresi
+
+def calculate_preparation_time(df):
+    # 'Time_Orderd' ve 'Time_Order_picked' sütunlarını timedelta olarak değiştirin
+    df['Time_Orderd'] = pd.to_timedelta(df['Time_Orderd'])
+    df['Time_Order_picked'] = pd.to_timedelta(df['Time_Order_picked'])
+
+    # Teslimat hazırlanma süresini hesaplayın
+    df['prep_time'] = np.where(df['Time_Order_picked'] < df['Time_Orderd'],
+                                              df['Time_Order_picked'] - df['Time_Orderd'] + pd.Timedelta(days=1),
+                                              df['Time_Order_picked'] - df['Time_Orderd'])
+
+    # Teslimat hazırlanma süresini dakika cinsine dönüştürün
+    df['prep_time'] = (df['prep_time'].dt.total_seconds() / 60).astype(int)
+
+    return df
+calculate_preparation_time(df)
+
+
+
+
+### Yıl değişkenini kaldırma ###
+df.drop('year', axis=1, inplace=True)
 
 
 

@@ -1,9 +1,12 @@
-from src.utils.helpers import check_df,grab_col_names,cat_summary,num_summary,check_outlier,missing_values_table,quick_missing_imp
+from src.utils.helpers import check_df,grab_col_names,cat_summary,num_summary,check_outlier,quick_missing_imp
 import warnings
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import missingno as msno
+from geopy.distance import geodesic
+from datetime import datetime, timedelta
+
 
 
 pd.set_option('display.max_columns', None)
@@ -17,7 +20,8 @@ df.info()
 df.replace({"NaN": np.nan}, regex=True, inplace = True)
 
 ## Veri Tiplerini Düzenleme
-
+df['Time_Orderd']=pd.to_timedelta(df['Time_Orderd'])
+df['Time_Order_picked']=pd.to_timedelta(df['Time_Order_picked'])
 # Yaş değişkenini float'a çevirme
 df['Delivery_person_Age'] = df['Delivery_person_Age'].astype(float)
 
@@ -32,25 +36,31 @@ df['multiple_deliveries'] = df['multiple_deliveries'].astype(float)
 
 # Order Date değişkenini yıl,ay,gün olarak ayırma
 df['Order_Date']=pd.to_datetime(df['Order_Date'])
+
+
+"""
 df['year']= df['Order_Date'].dt.year
 df['month']= df['Order_Date'].dt.month
 df['day']= df['Order_Date'].dt.day
+"""
 
 
 # Time_Order_picked değişkenini saat ve dakika olarak ayırma
+"""
 df['Time_Order_picked_Hour']=df['Time_Order_picked'].str.split(":",expand=True)[0].astype('int')
 df['Time_Order_picked_Min']=df['Time_Order_picked'].str.split(":",expand=True)[1].astype('int')
+"""
 
 # Time_Orderd değişkenini saat ve dakika olarak ayırma
+"""
 df['Time_Orderd_Hour']=df['Time_Orderd'].str.split(':',expand=True)[0]
-df.dropna(subset=['Time_Orderd_Hour'],inplace=True)
+
 df['Time_Orderd_Min']=df['Time_Orderd'].str.split(':',expand=True)[1]
 df['Time_Orderd_Hour']=df['Time_Orderd_Hour'].astype('int64')
 df['Time_Orderd_Min']=df['Time_Orderd_Min'].astype('int64')
+"""
 
-# Eski değişkenleri silme
-df.drop(["Time_Order_picked", "Time_Orderd"], axis=1, inplace=True)
-df.drop('Order_Date',inplace=True,axis=1)
+
 
 df.head()
 df.tail()
@@ -76,13 +86,13 @@ for col in cat_cols:
     cat_summary(df,col)
 
 # numerik değişken analizi
-for col in cat_cols:
+for col in num_cols:
     num_summary(df,col,True)
 
 # korelasyon analizi
 corr = df[num_cols].corr()
 
-sns.set(rc={'figure.figsize': (10, 10)})
+sns.set(rc={'figure.figsize': (15, 15)})
 sns.heatmap(corr, cmap="RdBu")
 plt.show()
 

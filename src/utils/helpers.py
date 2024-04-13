@@ -1,18 +1,4 @@
 def check_df(dataframe):
-    """
-    Verilen DataFrame'in bazı özelliklerini kontrol eder ve yazdırır.
-
-    Parametreler:
-    dataframe (pandas.DataFrame): Kontrol edilecek DataFrame.
-
-    Çıktı:
-    - DataFrame'in şekli (shape) yazdırılır.
-    - DataFrame'in sütun veri tipleri (types) yazdırılır.
-    - DataFrame'in ilk 3 satırı (head) yazdırılır.
-    - DataFrame'in son 3 satırı (tail) yazdırılır.
-    - DataFrame'deki eksik değerlerin sayısı (NA) yazdırılır.
-    - DataFrame'in çeyreklikleri (quantiles) yazdırılır.
-    """
     print("##################### Shape #####################")
     print(dataframe.shape)
     print("##################### Types #####################")
@@ -23,12 +9,15 @@ def check_df(dataframe):
     print(dataframe.tail(3))
     print("##################### NA #####################")
     print(dataframe.isnull().sum())
+
+    # Sadece sayısal sütunları seçme
+    numeric_columns = dataframe.select_dtypes(include=np.number)
     print("##################### Quantiles #####################")
-    print(dataframe.quantile([0, 0.05, 0.50, 0.95, 0.99, 1]).T)
+    print(numeric_columns.quantile([0, 0.05, 0.50, 0.95, 0.99, 1]).T)
 
 
 
-def grab_col_names(dataframe, cat_th=10, car_th=20):
+def grab_col_names(dataframe, cat_th=10, car_th=25):
     """
     Verilen veri çerçevesi için sütun isimlerini alır ve kategorik, kategorik ancak kardinal ve sayısal değişkenleri belirler.
 
@@ -254,7 +243,6 @@ def quick_missing_imp(data, num_method="median", cat_length=20, target="Time_tak
     print(data[variables_with_na].isnull().sum(), "\n\n")
 
     return data
-
 
 
 

@@ -178,21 +178,14 @@ def check_outlier(dataframe, col_name):
         return False
 
 
-for col in num_cols:
-    if col != "Time_taken(min)":
-        print(col, check_outlier(df, col))
-
-
 def missing_values_table(dataframe, na_name=False):
     """
     Verilen veri çerçevesindeki eksik değerleri analiz eder ve eksik değer tablosunu yazdırır.
 
-    Parametreler:
-    dataframe (pandas.DataFrame): Eksik değerlerin analiz edileceği veri çerçevesi.
-    na_name (bool, optional): Eksik değer bulunan sütunların isimlerini döndürsün mü? Varsayılan değer False.
+    :param dataframe: pandas.DataFrame, Eksik değerlerin analiz edileceği veri çerçevesi.
+    :param na_name: bool, Opsiyonel, Eksik değer bulunan sütunların isimlerini döndürsün mü? Varsayılan değer False.
 
-    Returns:
-    list: Eksik değer bulunan sütunların isimleri (opsiyonel, na_name=True durumunda).
+    :return: list, Eksik değer bulunan sütunların isimleri (opsiyonel, na_name=True durumunda).
 
     Örnek:
     missing_values_table(dataframe)
@@ -216,9 +209,6 @@ def missing_values_table(dataframe, na_name=False):
     # Opsiyonel olarak, eksik değer bulunan sütunların isimlerini döndürür
     if na_name:
         return na_columns
-
-# Fonksiyonun örnek kullanımı
-missing_values_table(df)
 
 
 def quick_missing_imp(data, num_method="median", cat_length=20, target="Time_taken(min)"):
@@ -266,7 +256,7 @@ def quick_missing_imp(data, num_method="median", cat_length=20, target="Time_tak
     return data
 
 
-df = quick_missing_imp(df, num_method="median", cat_length=20)
+
 
 
 
@@ -292,8 +282,8 @@ def rare_analyser(dataframe, target, cat_cols):
                             "RATIO": dataframe[col].value_counts() / len(dataframe),
                             "TARGET_MEAN": dataframe.groupby(col)[target].mean()}), end="\n\n\n")
 
-# Fonksiyonun örnek kullanımı
-rare_analyser(df, "Time_taken(min)", cat_cols)
+
+
 
 
 
@@ -324,9 +314,6 @@ def label_encoder(dataframe, binary_col):
 # İkili kategorik değişkenlerin listesi oluşturulur
 binary_cols = [col for col in df.columns if df[col].dtypes == "O" and len(df[col].unique()) == 2]
 
-# Her bir ikili kategorik değişken için label_encoder fonksiyonu çağrılır
-for col in binary_cols:
-    label_encoder(df, col)
 
 
 def one_hot_encoder(dataframe, categorical_cols, drop_first=False):
@@ -350,5 +337,5 @@ def one_hot_encoder(dataframe, categorical_cols, drop_first=False):
     return dataframe
 
 
-# Örnek kullanım
-df = one_hot_encoder(df, cat_cols, drop_first=True)
+
+

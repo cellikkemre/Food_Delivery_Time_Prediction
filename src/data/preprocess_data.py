@@ -1,14 +1,11 @@
-from src.utils.helpers import check_df,grab_col_names,cat_summary,num_summary,check_outlier,quick_missing_imp
-import warnings
+from src.utils.helpers import check_df,grab_col_names,cat_summary,num_summary,outlier_thresholds,check_outlier,missing_values_table,quick_missing_imp,target_summary_with_cat
+from src.utils.helpers import replace_with_thresholds
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import missingno as msno
-from geopy.distance import geodesic
-from datetime import datetime, timedelta
-
-
-
+import warnings
+import pandas as pd
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 500)
 pd.set_option('display.max_rows', 500)
@@ -32,33 +29,10 @@ df['Delivery_person_Ratings'] = df['Delivery_person_Ratings'].astype(float)
 df['Time_taken(min)'] = df['Time_taken(min)'].str.extract('(\d+)').astype(float)
 
 # multiple_deliveries değişkenini floata çevirme
-df['multiple_deliveries'] = df['multiple_deliveries'].astype(float)
+df['multiple_deliveries'] = df['multiple_deliveries'].astype('float')
 
 # Order Date değişkenini yıl,ay,gün olarak ayırma
 df['Order_Date']=pd.to_datetime(df['Order_Date'])
-
-
-"""
-df['year']= df['Order_Date'].dt.year
-df['month']= df['Order_Date'].dt.month
-df['day']= df['Order_Date'].dt.day
-"""
-
-
-# Time_Order_picked değişkenini saat ve dakika olarak ayırma
-"""
-df['Time_Order_picked_Hour']=df['Time_Order_picked'].str.split(":",expand=True)[0].astype('int')
-df['Time_Order_picked_Min']=df['Time_Order_picked'].str.split(":",expand=True)[1].astype('int')
-"""
-
-# Time_Orderd değişkenini saat ve dakika olarak ayırma
-"""
-df['Time_Orderd_Hour']=df['Time_Orderd'].str.split(':',expand=True)[0]
-
-df['Time_Orderd_Min']=df['Time_Orderd'].str.split(':',expand=True)[1]
-df['Time_Orderd_Hour']=df['Time_Orderd_Hour'].astype('int64')
-df['Time_Orderd_Min']=df['Time_Orderd_Min'].astype('int64')
-"""
 
 
 
@@ -89,6 +63,10 @@ for col in cat_cols:
 for col in num_cols:
     num_summary(df,col,True)
 
+# target analizi
+for col in cat_cols:
+    target_summary_with_cat(df,"Time_taken(min)",col)
+
 # korelasyon analizi
 corr = df[num_cols].corr()
 
@@ -102,21 +80,27 @@ for col in num_cols:
     if col != "Time_taken(min)":
       print(col, check_outlier(df, col))
 
+# 1 ile 5 arasında olmayan puanları filtreleme
+drop_index = df[df["Delivery_person_Ratings"] > 5].index
+df.drop(drop_index, axis=0, inplace=True)
+
+# 18 yaş altındakilerin kaldırılması
+df = df[df['Delivery_person_Age'] >= 18]
+
+
+# Aykırı değerlerin baskılanması
+
+for col in num_cols:
+    if col != "Time_taken(min)":
+        replace_with_thresholds(df,col)
+
+# aykırı değer kontrolü
+
+for col in num_cols:
+    print(col, check_outlier(df, col))
+
+
 ### EKSİK DEĞER ANALİZİ ###
-
-def missing_values_table(dataframe, na_name=False):
-    na_columns = [col for col in dataframe.columns if dataframe[col].isnull().sum() > 0]
-
-    n_miss = dataframe[na_columns].isnull().sum().sort_values(ascending=False)
-
-    ratio = (dataframe[na_columns].isnull().sum() / dataframe.shape[0] * 100).sort_values(ascending=False)
-
-    missing_df = pd.concat([n_miss, np.round(ratio, 2)], axis=1, keys=['n_miss', 'ratio'])
-
-    print(missing_df, end="\n")
-
-    if na_name:
-        return na_columns
 
 missing_values_table(df)
 

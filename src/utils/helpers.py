@@ -1,3 +1,10 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+import matplotlib.pyplot as plt
+from geopy.distance import geodesic
+from sklearn.preprocessing import LabelEncoder,OneHotEncoder
+
 def check_df(dataframe):
     print("##################### Shape #####################")
     print(dataframe.shape)
@@ -122,6 +129,11 @@ def num_summary(dataframe, numerical_col, plot=False):
     print("#####################################")
 
 
+
+def target_summary_with_cat(dataframe, target, categorical_col):
+    print(pd.DataFrame({"TARGET_MEAN": dataframe.groupby(categorical_col)[target].mean()}), end="\n\n\n")
+
+
 def outlier_thresholds(dataframe, variable, low_quantile=0.05, up_quantile=0.95):
     """
     Verilen sayısal bir değişken için alt ve üst sınır eşik değerlerini hesaplar.
@@ -165,6 +177,26 @@ def check_outlier(dataframe, col_name):
         return True
     else:
         return False
+
+
+def replace_with_thresholds(dataframe, variable):
+    """
+    Verilen bir DataFrame içinde belirtilen değişkenin outlier değerlerini alt ve üst sınırlarla değiştirir.
+
+    Parametreler:
+    dataframe (pandas.DataFrame): Outlier değerlerin bulunduğu DataFrame.
+    variable (str): Outlier değerlerinin kontrol edileceği değişkenin adı.
+
+    Returns:
+    None
+    """
+    low_limit, up_limit = outlier_thresholds(dataframe, variable)
+    dataframe.loc[(dataframe[variable] < low_limit), variable] = low_limit
+    dataframe.loc[(dataframe[variable] > up_limit), variable] = up_limit
+
+
+
+
 
 
 def missing_values_table(dataframe, na_name=False):
@@ -248,27 +280,7 @@ def quick_missing_imp(data, num_method="median", cat_length=20, target="Time_tak
 
 
 
-def rare_analyser(dataframe, target, cat_cols):
-    """
-    Verilen kategorik değişkenlerin nadir sınıflarını analiz eder.
 
-    Parametreler:
-    dataframe (pandas.DataFrame): Kategorik değişkenlerin analiz edileceği veri çerçevesi.
-    target (str): Hedef değişkenin adı.
-    cat_cols (list): Analiz edilecek kategorik değişkenlerin adlarını içeren liste.
-
-    Returns:
-    None
-
-    Örnek:
-    rare_analyser(dataframe, "target_variable", ["categorical_col1", "categorical_col2"])
-    """
-    # Her bir kategorik değişken için nadir sınıfları ve ilgili istatistikleri yazdırır
-    for col in cat_cols:
-        print(col, ":", len(dataframe[col].value_counts()))
-        print(pd.DataFrame({"COUNT": dataframe[col].value_counts(),
-                            "RATIO": dataframe[col].value_counts() / len(dataframe),
-                            "TARGET_MEAN": dataframe.groupby(col)[target].mean()}), end="\n\n\n")
 
 
 
@@ -290,7 +302,8 @@ def label_encoder(dataframe, binary_col):
     Örnek:
     dataframe = label_encoder(dataframe, "binary_column")
     """
-    # LabelEncoder nesnesi oluşturulur
+
+
     labelencoder = LabelEncoder()
 
     # İkili sınıfların etiket kodlaması yapılır
@@ -299,8 +312,8 @@ def label_encoder(dataframe, binary_col):
     return dataframe
 
 
-# İkili kategorik değişkenlerin listesi oluşturulur
-binary_cols = [col for col in df.columns if df[col].dtypes == "O" and len(df[col].unique()) == 2]
+
+
 
 
 
@@ -326,4 +339,137 @@ def one_hot_encoder(dataframe, categorical_cols, drop_first=False):
 
 
 
+def extract_and_expand_city(id):
+    """
+    Bu fonksiyon, bir teslimat personeli kimliğinden şehrin adını çıkarır ve uzun haliyle değiştirir.
+
+    Parametreler:
+        id: Teslimat personeli kimliği.
+
+    Dönüş Değeri:
+        Şehrin uzun hali.
+    """
+    res_index = id.find('RES')  # 'RES' kelimesinin indeksini bulun
+    if res_index != -1:  # Eğer 'RES' kelimesi bulunduysa
+        short_name = id[:res_index]  # 'RES' kelimesinin öncesini (şehir adını) alın
+        city_names = {
+            'JAP': 'Japura',
+            'COIMB': 'Coimbatore',
+            'INDO': 'Indore',
+            'SUR': 'Surat',
+            'CHEN': 'Chennai',
+            'RANCHI': 'Ranchi',
+            'MYS': 'Mysore',
+            'PUNE': 'Pune',
+            'HYD': 'Hyderabad',
+            'MUM': 'Mumbai',
+            'VAD': 'Vadodara',
+            'BANG': 'Bangalore',
+            'LUDH': 'Ludhiana',
+            'KNP': 'Kanpur',
+            'AGR': 'Agra',
+            'ALH': 'Allahabad',
+            'DEH': 'Dehradun',
+            'KOC': 'Kochi',
+            'AURG': 'Aurangabad',
+            'BHP': 'Bhopal',
+            'GOA': 'Goa',
+            'KOL': 'Kolkata'
+        }
+        return city_names.get(short_name, None)  # Şehrin uzun halini döndür
+    else:
+        return None
+
+
+
+def average_rating_by_weather(df):
+    weather_conditions = df['Weatherconditions'].unique()
+    avg_ratings_by_weather = {}
+    for condition in weather_conditions:
+        avg_rating = df[df['Weatherconditions'] == condition]['Delivery_person_Ratings'].mean()
+        avg_ratings_by_weather[condition] = avg_rating
+    return avg_ratings_by_weather
+
+
+
+def average_rating_by_traffic(df):
+    traffic_conditions = df['Road_traffic_density'].unique()
+    avg_ratings_by_traffic = {}
+    for condition in traffic_conditions:
+        avg_rating = df[df['Road_traffic_density'] == condition]['Delivery_person_Ratings'].mean()
+        avg_ratings_by_traffic[condition] = avg_rating
+    return avg_ratings_by_traffic
+
+
+
+def average_rating_by_city(df):
+    cities = df['City'].unique()
+    avg_ratings_by_city = {}
+    for city in cities:
+        avg_rating = df[df['City'] == city]['Delivery_person_Ratings'].mean()
+        avg_ratings_by_city[city] = avg_rating
+    return avg_ratings_by_city
+
+
+
+
+def add_rating_columns(df):
+    # Hava koşullarına göre ortalama puanlar
+    avg_ratings_weather = average_rating_by_weather(df)
+    df['Avg_Rating_By_Weather'] = df['Weatherconditions'].map(avg_ratings_weather)
+
+    # Trafik yoğunluğuna göre ortalama puanlar
+    avg_ratings_traffic = average_rating_by_traffic(df)
+    df['Avg_Rating_By_Traffic'] = df['Road_traffic_density'].map(avg_ratings_traffic)
+
+    # Şehre göre ortalama puanlar
+    avg_ratings_city = average_rating_by_city(df)
+    df['Avg_Rating_By_City'] = df['City'].map(avg_ratings_city)
+
+    return df
+
+
+
+
+def calculate_distance(df):
+    """
+    Verilen bir veri çerçevesindeki restoran ve teslimat lokasyonları arasındaki mesafeyi hesaplar ve yeni bir sütun oluşturur.
+    """
+    distances = []
+    for index, row in df.iterrows():
+        restaurant_coords = (row['Restaurant_latitude'], row['Restaurant_longitude'])
+        delivery_coords = (row['Delivery_location_latitude'], row['Delivery_location_longitude'])
+        distance = geodesic(restaurant_coords, delivery_coords).kilometers
+        distance_rounded = round(distance, 2)
+        distances.append(distance_rounded)
+    df['Distance'] = distances
+
+
+
+def calculate_preparation_time(df):
+    # 'Time_Orderd' ve 'Time_Order_picked' sütunlarını timedelta olarak değiştirin
+    df['Time_Orderd'] = pd.to_timedelta(df['Time_Orderd'])
+    df['Time_Order_picked'] = pd.to_timedelta(df['Time_Order_picked'])
+
+    # Teslimat hazırlanma süresini hesaplayın
+    df['prep_time'] = np.where(df['Time_Order_picked'] < df['Time_Orderd'],
+                                              df['Time_Order_picked'] - df['Time_Orderd'] + pd.Timedelta(days=1),
+                                              df['Time_Order_picked'] - df['Time_Orderd'])
+
+    # Teslimat hazırlanma süresini dakika cinsine dönüştürün
+    df['prep_time'] = (df['prep_time'].dt.total_seconds() / 60).astype('int64')
+
+
+
+def time_of_day(x):
+    if x in [4, 5, 6, 7, 8, 9, 10]:
+        return "Morning"
+    elif x in [11, 12, 13, 14, 15]:
+        return "Afternoon"
+    elif x in [16, 17, 18, 19]:
+        return "Evening"
+    elif x in [20, 21, 22, 23]:
+        return "Night"
+    else:
+        return "Midnight"
 

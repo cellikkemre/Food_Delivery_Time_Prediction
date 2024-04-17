@@ -154,24 +154,16 @@ def delivery_data_prep(df):
 
     cat_cols, num_cols, cat_but_car = grab_col_names(df)
     cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
-
+    train_df = df[df['DELIVERY_TIME'].notnull()]
+    test_df = df[df['DELIVERY_TIME'].isnull()]
     y = df["DELIVERY_TIME"]
     X = df.drop(["DELIVERY_TIME"], axis=1)
-
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
     return X, y
 
 
-# Models
+# Model
 
-
-
-train_df = df[df['DELIVERY_TIME'].notnull()]
-test_df = df[df['DELIVERY_TIME'].isnull()]
-
-
-
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
 
 def evaluate_models(X_train, X_test, y_train, y_test):
     def scores(y_test, p):
@@ -273,8 +265,10 @@ def main():
     evaluate_models(X_train, X_test, y_train, y_test)
     best_models = hyperparameter_optimization(X, y)
     voting_reg = voting_regressor(best_models, X, y)
-    joblib.dump(voting_reg, "voting_clf.pkl")
+    joblib.dump(voting_reg, "voting_clf3.pkl")
     return voting_reg
+
+
 
 
 

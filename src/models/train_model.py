@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, V
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error,mean_squared_error
 
+# Feature Engineering Öncesi Model Sonuçlarını Değerlendirme
 
 dff = df.copy()
 dff.drop(["ID", "Delivery_person_ID"], axis=1, inplace=True)
@@ -21,6 +22,7 @@ cat_cols = [col for col in cat_cols if col not in ["Time_taken(min)"]]
 cat_cols
 
 
+# encod işlemleri
 
 binary_cols = [col for col in df.columns if df[col].dtypes == "O" and len(df[col].unique()) == 2]
 

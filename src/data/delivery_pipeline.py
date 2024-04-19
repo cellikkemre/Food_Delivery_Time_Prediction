@@ -13,7 +13,7 @@ from sklearn.metrics import mean_absolute_error,mean_squared_error
 from src.utils.helpers import  quick_missing_imp,extract_and_expand_city,add_rating_columns,calculate_distance,calculate_preparation_time
 from src.utils.helpers import time_of_day,grab_col_names,check_df
 from sklearn.model_selection import GridSearchCV, cross_validate
-
+from src.evaluation.evaluate_model import hyperparameter_optimization
 
 
 # Data Preprocessing & Feature Engineering
@@ -154,25 +154,17 @@ def delivery_data_prep(df):
 
     cat_cols, num_cols, cat_but_car = grab_col_names(df)
     cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
-
+    train_df = df[df['DELIVERY_TIME'].notnull()]
+    test_df = df[df['DELIVERY_TIME'].isnull()]
     y = df["DELIVERY_TIME"]
     X = df.drop(["DELIVERY_TIME"], axis=1)
-
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
     return X, y
 
 
-# Models
 
 
-
-train_df = df[df['DELIVERY_TIME'].notnull()]
-test_df = df[df['DELIVERY_TIME'].isnull()]
-
-
-
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
-
+# Model
 def evaluate_models(X_train, X_test, y_train, y_test):
     def scores(y_test, p):
         r2 = r2_score(y_test, p)
@@ -202,53 +194,13 @@ def evaluate_models(X_train, X_test, y_train, y_test):
         scores(y_test, p)
 
 
-# Hyperparameter Optimization
-
-rf_params = {"max_depth": [8, 15, None],
-             "max_features": [5, 7, 1.0],
-             "min_samples_split": [15, 20],
-             "n_estimators": [200, 300]}
-
-gb_params = {'n_estimators': [50, 100, 150],
-             'learning_rate': [0.01, 0.1, 0.2],
-             'max_depth': [3, 5, 10]}
-
-xgb_params = {'n_estimators': [50, 100, 150],
-              'learning_rate': [0.01, 0.1, 0.2],
-              'max_depth': [3, 5, 10]}
 
 
 
 
-classifiers = [('RF', RandomForestRegressor(), rf_params),
-               ('XGBoost', XGBRegressor(use_label_encoder=False, eval_metric='logloss'), xgb_params),
-               ('GB', GradientBoostingRegressor(), gb_params)]
-
-def hyperparameter_optimization(X, y, cv=3, scoring="r2"):
-    print("Hyperparameter Optimization....")
-    best_models = {}
-    regressors = [
-        ("RF", RandomForestRegressor(), rf_params),
-        ("GB", GradientBoostingRegressor(), gb_params),
-        ("XGB", XGBRegressor(use_label_encoder=False, eval_metric='logloss'), xgb_params)
-    ]
-    for name, regressor, params in regressors:
-        print(f"########## {name} ##########")
-        cv_results = cross_validate(regressor, X, y, cv=cv, scoring=scoring)
-        print(f"{scoring} (Before): {round(cv_results['test_score'].mean(), 4)}")
-
-        gs_best = GridSearchCV(regressor, params, cv=cv, n_jobs=-1, verbose=False).fit(X, y)
-        final_model = regressor.set_params(**gs_best.best_params_)
-
-        cv_results = cross_validate(final_model, X, y, cv=cv, scoring=scoring)
-        print(f"{scoring} (After): {round(cv_results['test_score'].mean(), 4)}")
-        print(f"{name} best params: {gs_best.best_params_}", end="\n\n")
-        best_models[name] = final_model
-    return best_models
 
 
 # Stacking & Ensemble Learning
-
 def voting_regressor(best_models, X, y):
     print("Voting Regressor...")
 
@@ -273,8 +225,10 @@ def main():
     evaluate_models(X_train, X_test, y_train, y_test)
     best_models = hyperparameter_optimization(X, y)
     voting_reg = voting_regressor(best_models, X, y)
-    joblib.dump(voting_reg, "voting_clf.pkl")
+    joblib.dump(voting_reg, "voting_clf3.pkl")
     return voting_reg
+
+
 
 
 

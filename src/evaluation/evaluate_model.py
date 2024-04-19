@@ -1,8 +1,8 @@
-from sklearn.model_selection import GridSearchCV
+from sklearn.model_selection import cross_validate, GridSearchCV
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.ensemble import GradientBoostingRegressor
 from xgboost import XGBRegressor
-from sklearn.model_selection import cross_validate, GridSearchCV
+
 
 
 
@@ -26,7 +26,7 @@ classifiers = [('RF', RandomForestRegressor(), rf_params),
                ('XGBoost', XGBRegressor(use_label_encoder=False, eval_metric='logloss'), xgb_params),
                ('GB', GradientBoostingRegressor(), gb_params)]
 
-from sklearn.model_selection import cross_validate, GridSearchCV
+
 
 def hyperparameter_optimization(X, y, cv=3, scoring="r2"):
     print("Hyperparameter Optimization....")

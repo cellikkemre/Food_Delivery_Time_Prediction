@@ -1,16 +1,17 @@
 from src.utils.helpers import label_encoder,one_hot_encoder
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression,Ridge
-from sklearn.svm import SVR
-from xgboost import XGBRegressor
-from sklearn.tree import DecisionTreeRegressor
 from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor,VotingRegressor
-from sklearn.metrics import r2_score
-from sklearn.metrics import mean_absolute_error,mean_squared_error
-import numpy as np
 import joblib
 from sklearn.model_selection import cross_validate
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
+from xgboost import XGBRegressor
+from sklearn.tree import DecisionTreeRegressor
+from sklearn.svm import SVR
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+import numpy as np
+
 
 cat_cols, num_cols, cat_but_car = grab_col_names(df)
 
@@ -21,6 +22,9 @@ for col in cat_cols:
     target_summary_with_cat(df, "DELIVERY_TIME", col)
 
 cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
+
+
+# Label encod
 def label_encoder(dataframe, binary_col):
     """
     Verilen kategorik bir değişkenin ikili sınıflarını 0 ve 1'e dönüştürür.
@@ -55,7 +59,7 @@ df = one_hot_encoder(df, cat_cols, drop_first=True)
 df = df.replace({True: 1, False: 0})
 
 
-# Son güncel değişken türlerimi tutuyorum.
+# Son güncel değişken türlerini tutma
 cat_cols, num_cols, cat_but_car = grab_col_names(df)
 cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
 
@@ -78,34 +82,36 @@ X = train_df.drop(["DELIVERY_TIME"], axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
 
-def scores(y_test,p):
+def evaluate_models(X_train, X_test, y_train, y_test):
+    def scores(y_test, p):
+        r2 = r2_score(y_test, p)
+        MAE = mean_absolute_error(y_test, p)
+        MSE = mean_squared_error(y_test, p)
+        rmse = np.sqrt(mean_squared_error(y_test, p))
+        print(' r2_score:  {:.2f}'.format(r2))
+        print(' MAE:   {:.2f}'.format(MAE))
+        print(' MSE:   {:.2f}'.format(MSE))
+        print(' rmse:  {:.2f}'.format(rmse))
+        print("=========================")
 
-    r2 = r2_score(y_test, p)
-    MAE = mean_absolute_error(y_test, p)
-    MSE = mean_squared_error(y_test, p)
-    rmse = np.sqrt(mean_squared_error(y_test, p))
-    print(' r2_score:  {:.2f}'.format(r2))
-    print(' MAE:   {:.2f}'.format(MAE))
-    print(' MSE:   {:.2f}'.format(MSE))
-    print(' rmse:  {:.2f}'.format(rmse))
-    print("=========================")
+    models = {
+        "Linear Regression": LinearRegression(),
+        "Ridge": Ridge(),
+        "Random Forest": RandomForestRegressor(),
+        "Gradient Boosting": GradientBoostingRegressor(),
+        "XGBRegressor": XGBRegressor(),
+        "Decision Tree": DecisionTreeRegressor(),
+        "SVM": SVR()
+    }
 
-models = {
-    "linear Regression": LinearRegression(),
-    "Ridge":Ridge(),
-    "Random Forest": RandomForestRegressor(),
-    "Gradient Boosting": GradientBoostingRegressor(),
-    "XGBRegressor": XGBRegressor(),
-    "Decision Tree": DecisionTreeRegressor(),
-    "SVM": SVR()
-}
-for i in range(len(list(models))):
-    model = list(models.values())[i]
-    model.fit(X_train, y_train)
-    p=model.predict(X_test)
-    print(list(models.keys())[i])
-    scores(y_test, p)
+    for model_name, model_instance in models.items():
+        model_instance.fit(X_train, y_train)
+        print(model_name)
+        p = model_instance.predict(X_test)
+        scores(y_test, p)
 
+# Fonksiyonun çağrılması
+evaluate_models(X_train, X_test, y_train, y_test)
 
 """
 linear Regression
@@ -151,46 +157,6 @@ SVM
  rmse:  8.05
 =========================
 """
-from sklearn.linear_model import LinearRegression, Ridge
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from xgboost import XGBRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.svm import SVR
-from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
-import numpy as np
-
-def evaluate_models(X_train, X_test, y_train, y_test):
-    def scores(y_test, p):
-        r2 = r2_score(y_test, p)
-        MAE = mean_absolute_error(y_test, p)
-        MSE = mean_squared_error(y_test, p)
-        rmse = np.sqrt(mean_squared_error(y_test, p))
-        print(' r2_score:  {:.2f}'.format(r2))
-        print(' MAE:   {:.2f}'.format(MAE))
-        print(' MSE:   {:.2f}'.format(MSE))
-        print(' rmse:  {:.2f}'.format(rmse))
-        print("=========================")
-
-    models = {
-        "Linear Regression": LinearRegression(),
-        "Ridge": Ridge(),
-        "Random Forest": RandomForestRegressor(),
-        "Gradient Boosting": GradientBoostingRegressor(),
-        "XGBRegressor": XGBRegressor(),
-        "Decision Tree": DecisionTreeRegressor(),
-        "SVM": SVR()
-    }
-
-    for model_name, model_instance in models.items():
-        model_instance.fit(X_train, y_train)
-        print(model_name)
-        p = model_instance.predict(X_test)
-        scores(y_test, p)
-
-# Fonksiyonun çağrılması
-evaluate_models(X_train, X_test, y_train, y_test)
-
-
 
 
 def voting_regressor(best_models, X, y):
@@ -223,7 +189,8 @@ random_user = X.sample(1, random_state=45)
 voting_reg.predict(random_user)
 
 #modeli kaydetme
-joblib.dump(voting_reg, "voting_clf2.pkl")
+joblib.dump(voting_reg, "voting_clf3.pkl")
 
-new_model = joblib.load("voting_clf2.pkl")
+new_model = joblib.load("voting_clf3.pkl")
 new_model.predict(random_user)
+

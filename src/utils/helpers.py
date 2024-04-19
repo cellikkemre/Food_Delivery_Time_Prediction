@@ -383,6 +383,18 @@ def extract_and_expand_city(id):
 
 
 def average_rating_by_weather(df):
+    """
+    Farklı hava koşulları altında ortalama teslimat personeli puanlarını hesaplar.
+
+    Parametreler:
+    - df (DataFrame): 'Weatherconditions' adında farklı hava koşullarını temsil eden bir sütun ve
+                      'Delivery_person_Ratings' adında teslimat personeli tarafından verilen puanları
+                      temsil eden bir sütun içeren Pandas DataFrame.
+
+    Dönüşler:
+    - avg_ratings_by_weather (dict): Anahtarları farklı hava koşulları olan ve her bir koşul için
+                                      ortalama puanları temsil eden bir sözlük.
+    """
     weather_conditions = df['Weatherconditions'].unique()
     avg_ratings_by_weather = {}
     for condition in weather_conditions:
@@ -393,6 +405,18 @@ def average_rating_by_weather(df):
 
 
 def average_rating_by_traffic(df):
+    """
+    Farklı yol trafik yoğunlukları altında ortalama teslimat personeli puanlarını hesaplar.
+
+    Parametreler:
+    - df (DataFrame): 'Road_traffic_density' adında farklı yol trafik yoğunluklarını temsil eden bir sütun ve
+                      'Delivery_person_Ratings' adında teslimat personeli tarafından verilen puanları
+                      temsil eden bir sütun içeren Pandas DataFrame.
+
+    Dönüşler:
+    - avg_ratings_by_traffic (dict): Anahtarları farklı trafik yoğunlukları olan ve her bir yoğunluk için
+                                     ortalama puanları temsil eden bir sözlük.
+    """
     traffic_conditions = df['Road_traffic_density'].unique()
     avg_ratings_by_traffic = {}
     for condition in traffic_conditions:
@@ -402,7 +426,20 @@ def average_rating_by_traffic(df):
 
 
 
+
 def average_rating_by_city(df):
+    """
+    Farklı şehirlerde ortalama teslimat personeli puanlarını hesaplar.
+
+    Parametreler:
+    - df (DataFrame): 'City' adında farklı şehirleri temsil eden bir sütun ve
+                      'Delivery_person_Ratings' adında teslimat personeli tarafından verilen puanları
+                      temsil eden bir sütun içeren Pandas DataFrame.
+
+    Dönüşler:
+    - avg_ratings_by_city (dict): Anahtarları farklı şehirler olan ve her bir şehir için
+                                   ortalama puanları temsil eden bir sözlük.
+    """
     cities = df['City'].unique()
     avg_ratings_by_city = {}
     for city in cities:
@@ -413,7 +450,20 @@ def average_rating_by_city(df):
 
 
 
+
 def add_rating_columns(df):
+    """
+    DataFrame'e üç yeni sütun ekler: hava koşullarına göre ortalama puanlar, trafik yoğunluğuna göre
+    ortalama puanlar ve şehre göre ortalama puanlar.
+
+    Parametreler:
+    - df (DataFrame): 'Weatherconditions' sütunuyla farklı hava koşullarını, 'Road_traffic_density'
+                      sütunuyla farklı trafik yoğunluklarını ve 'City' sütunuyla farklı şehirleri içeren
+                      bir Pandas DataFrame.
+
+    Dönüşler:
+    - df (DataFrame): Yeni eklenmiş sütunlarla güncellenmiş DataFrame.
+    """
     # Hava koşullarına göre ortalama puanlar
     avg_ratings_weather = average_rating_by_weather(df)
     df['Avg_Rating_By_Weather'] = df['Weatherconditions'].map(avg_ratings_weather)
@@ -434,6 +484,13 @@ def add_rating_columns(df):
 def calculate_distance(df):
     """
     Verilen bir veri çerçevesindeki restoran ve teslimat lokasyonları arasındaki mesafeyi hesaplar ve yeni bir sütun oluşturur.
+
+    Parametreler:
+    - df (DataFrame): Restoran ve teslimat lokasyonlarının enlem ve boylamını içeren bir veri çerçevesi.
+
+    Dönüşler:
+    - None: Fonksiyon, verilen DataFrame'i günceller ve 'Distance' adında yeni bir sütun ekler,
+             bu sütun, her bir satır için restoran ile teslimat lokasyonu arasındaki mesafeyi içerir.
     """
     distances = []
     for index, row in df.iterrows():
@@ -446,7 +503,20 @@ def calculate_distance(df):
 
 
 
+
 def calculate_preparation_time(df):
+    """
+    Verilen bir veri çerçevesindeki siparişlerin hazırlanma süresini hesaplar ve yeni bir sütun oluşturur.
+
+    Parametreler:
+    - df (DataFrame): 'Time_Orderd' ve 'Time_Order_picked' sütunlarını içeren bir veri çerçevesi.
+                      'Time_Orderd', siparişin verildiği zamanı ve 'Time_Order_picked', siparişin hazır
+                      olduğu zamanı içerir.
+
+    Dönüşler:
+    - None: Fonksiyon, verilen DataFrame'i günceller ve 'prep_time' adında yeni bir sütun ekler.
+             Bu sütun, her bir satır için siparişin hazırlanma süresini dakika cinsinden içerir.
+    """
     # 'Time_Orderd' ve 'Time_Order_picked' sütunlarını timedelta olarak değiştirin
     df['Time_Orderd'] = pd.to_timedelta(df['Time_Orderd'])
     df['Time_Order_picked'] = pd.to_timedelta(df['Time_Order_picked'])
@@ -461,7 +531,18 @@ def calculate_preparation_time(df):
 
 
 
+
 def time_of_day(x):
+    """
+    Verilen bir saat değerine göre günün hangi zaman dilimine denk geldiğini belirler.
+
+    Parametreler:
+    - x (int): Saati temsil eden bir tamsayı değeri. Örneğin, 0-23 arası bir saat değeri beklenir.
+
+    Dönüşler:
+    - str: Saatin ait olduğu zaman dilimini ifade eden bir metin.
+           Örneğin, 'Morning', 'Afternoon', 'Evening', 'Night' veya 'Midnight'.
+    """
     if x in [4, 5, 6, 7, 8, 9, 10]:
         return "Morning"
     elif x in [11, 12, 13, 14, 15]:

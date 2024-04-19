@@ -6,6 +6,7 @@ import seaborn as sns
 import missingno as msno
 import warnings
 import pandas as pd
+
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', 500)
 pd.set_option('display.max_rows', 500)
@@ -14,6 +15,7 @@ warnings.simplefilter(action='ignore', category=Warning)
 
 df.head()
 df.info()
+
 df.replace({"NaN": np.nan}, regex=True, inplace = True)
 
 ## Veri Tiplerini Düzenleme

@@ -9,6 +9,7 @@ from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor, V
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_absolute_error,mean_squared_error
 
+# Feature Engineering Öncesi Model Sonuçlarını Değerlendirme
 
 dff = df.copy()
 dff.drop(["ID", "Delivery_person_ID"], axis=1, inplace=True)
@@ -21,6 +22,7 @@ cat_cols = [col for col in cat_cols if col not in ["Time_taken(min)"]]
 cat_cols
 
 
+# encod işlemleri
 
 binary_cols = [col for col in df.columns if df[col].dtypes == "O" and len(df[col].unique()) == 2]
 
@@ -45,33 +47,36 @@ y = train_df["Time_taken(min)"]
 X = train_df.drop(["Time_taken(min)"], axis=1)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, random_state=17)
-def scores(y_test,p):
+def evaluate_models(X_train, X_test, y_train, y_test):
+    def scores(y_test, p):
+        r2 = r2_score(y_test, p)
+        MAE = mean_absolute_error(y_test, p)
+        MSE = mean_squared_error(y_test, p)
+        rmse = np.sqrt(mean_squared_error(y_test, p))
+        print(' r2_score:  {:.2f}'.format(r2))
+        print(' MAE:   {:.2f}'.format(MAE))
+        print(' MSE:   {:.2f}'.format(MSE))
+        print(' rmse:  {:.2f}'.format(rmse))
+        print("=========================")
 
-    r2 = r2_score(y_test, p)
-    MAE = mean_absolute_error(y_test, p)
-    MSE = mean_squared_error(y_test, p)
-    rmse = np.sqrt(mean_squared_error(y_test, p))
-    print(' r2_score:  {:.2f}'.format(r2))
-    print(' MAE:   {:.2f}'.format(MAE))
-    print(' MSE:   {:.2f}'.format(MSE))
-    print(' rmse:  {:.2f}'.format(rmse))
-    print("=========================")
+    models = {
+        "Linear Regression": LinearRegression(),
+        "Ridge": Ridge(),
+        "Random Forest": RandomForestRegressor(),
+        "Gradient Boosting": GradientBoostingRegressor(),
+        "XGBRegressor": XGBRegressor(),
+        "Decision Tree": DecisionTreeRegressor(),
+        "SVM": SVR()
+    }
 
-models = {
-    "linear Regression": LinearRegression(),
-    "Ridge":Ridge(),
-    "Random Forest": RandomForestRegressor(),
-    "Gradient Boosting": GradientBoostingRegressor(),
-    "XGBRegressor": XGBRegressor(),
-    "Decision Tree": DecisionTreeRegressor(),
-    "SVM": SVR()
-}
-for i in range(len(list(models))):
-    model = list(models.values())[i]
-    model.fit(X_train, y_train)
-    p=model.predict(X_test)
-    print(list(models.keys())[i])
-    scores(y_test, p)
+    for model_name, model_instance in models.items():
+        model_instance.fit(X_train, y_train)
+        print(model_name)
+        p = model_instance.predict(X_test)
+        scores(y_test, p)
+
+# Fonksiyonun çağrılması
+evaluate_models(X_train, X_test, y_train, y_test)
 
 
 

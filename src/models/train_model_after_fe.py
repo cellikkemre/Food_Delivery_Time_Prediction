@@ -22,6 +22,9 @@ for col in cat_cols:
     target_summary_with_cat(df, "DELIVERY_TIME", col)
 
 cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
+
+
+# Label encod
 def label_encoder(dataframe, binary_col):
     """
     Verilen kategorik bir değişkenin ikili sınıflarını 0 ve 1'e dönüştürür.
@@ -56,7 +59,7 @@ df = one_hot_encoder(df, cat_cols, drop_first=True)
 df = df.replace({True: 1, False: 0})
 
 
-# Son güncel değişken türlerimi tutuyorum.
+# Son güncel değişken türlerini tutma
 cat_cols, num_cols, cat_but_car = grab_col_names(df)
 cat_cols = [col for col in cat_cols if "DELIVERY_TIME" not in col]
 
@@ -182,7 +185,7 @@ Explained Variance: 0.8387165629409014
 
 # #rastgele seçilen kullanıcı için teslimat tahmini
 X.columns
-random_user = X.sample(10, random_state=45)
+random_user = X.sample(1, random_state=45)
 voting_reg.predict(random_user)
 
 #modeli kaydetme

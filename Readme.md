@@ -1,29 +1,27 @@
-# Yemek Teslimat Süre Tahmini
+# Food Delivery Time Prediction
 
-## Problemin Tanımı
+## Problem Statement
 
-Bu proje, yemek teslimat sürelerini tahmin etmek için bir makine öğrenmesi modeli geliştirmeyi amaçlamaktadır. Model, çeşitli faktörleri kullanarak bir yemek siparişinin teslimat süresini tahmin etmeyi hedeflemektedir. Bu faktörler arasında teslimat personelinin yaşları, değerlendirmeleri, hava durumu, trafik yoğunluğu gibi çeşitli değişkenler yer almaktadır. Proje, müşteri memnuniyetini artırmak ve teslimat sürelerini optimize etmek amacıyla yapılmaktadır.
+This project aims to develop a machine learning model to predict food delivery times. The model aims to estimate the delivery time of a food order using various factors, including the delivery personnel's ages, ratings, weather conditions, and traffic density. The project is undertaken to enhance customer satisfaction and optimize delivery times.
 
-## Veri Seti
+## Dataset
 
-Modelin eğitimi ve değerlendirmesi için bir veri seti kullanılacaktır. Bu veri seti, yemek teslimatlarına ilişkin çeşitli bilgileri içerecektir. Bu bilgiler arasında teslimat personelinin yaşları, değerlendirmeleri, hava durumu, trafik yoğunluğu gibi faktörler bulunacaktır. Veri setinin işlenmesi ve modelin eğitilmesi aşamasında veri ön işleme adımları uygulanacaktır.
+A dataset will be used for the training and evaluation of the model. This dataset will contain various information related to food deliveries, including factors such as delivery personnel's ages, ratings, weather conditions, and traffic density. Data preprocessing steps will be applied during the processing of the dataset and training of the model.
 
-## Model Geliştirme
+## Model Development
 
-Makine öğrenmesi algoritmaları kullanılarak bir tahmin modeli geliştirilecektir. Bu model, veri setindeki çeşitli faktörleri kullanarak bir yemek siparişinin teslimat süresini tahmin etmeye çalışacaktır. Modelin başarısını değerlendirmek için çeşitli performans metrikleri kullanılacaktır. Modelin doğruluğunu artırmak için hiperparametre ayarlaması ve model optimizasyonu gibi teknikler uygulanacaktır.
+A prediction model will be developed using machine learning algorithms. This model will attempt to predict the delivery time of a food order using various factors from the dataset. Various performance metrics will be used to evaluate the model's success. Techniques such as hyperparameter tuning and model optimization will be employed to improve the accuracy of the model.
 
-## Kullanım
+## Usage
 
-Geliştirilen model, gerçek zamanlı yemek teslimatı sürelerini tahmin etmek için kullanılabilir. Müşteri siparişlerinin işlenmesi sırasında, modelin tahmin sonuçlarına dayanarak teslimat süreleri belirlenebilir. Bu şekilde, müşteri memnuniyeti artırılabilir ve teslimat süreleri optimize edilebilir.
+The developed model can be used to predict real-time food delivery times. During the processing of customer orders, delivery times can be determined based on the model's prediction results. This way, customer satisfaction can be enhanced, and delivery times can be optimized.
 
+## Model Performance
 
+The model developed within the scope of the project has been used to predict food delivery times. The performance of the model is as follows:
 
-## Model Performansı
+- Success Rate: 0.83
 
-Proje kapsamında geliştirilen model, yemek teslimat sürelerini tahmin etmek için kullanılmıştır. Modelin performansı aşağıdaki gibidir:
-
-- Başarı Oranı: 0.83
-
-Model, çeşitli makine öğrenmesi algoritmalarının birleştirilmesiyle oluşturulan bir Voting Regressor kullanılarak eğitilmiştir. Modelin başarı oranı, çapraz doğrulama (cross-validation) yöntemiyle belirlenmiştir.
+The model was trained using a Voting Regressor created by combining various machine learning algorithms. The success rate of the model was determined using the cross-validation method.
 
 
